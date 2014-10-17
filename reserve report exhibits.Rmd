@@ -1,0 +1,110 @@
+---
+title: "Default Data Frames for the ChainLadder Package"
+author: "Andy Merlino"
+date: "Friday, October 17, 2014"
+output: pdf_document
+---
+
+\begin{abstract}
+The `ChainLadder` package can create some powerful loss reserving projections.  The output from these reserving functions is a comprehensive R list object with a lot of data.  The `exhibit` package extracts the most commonly desired `ChainLadder` function outputs and returns a data frame.  This document displays how `exhibit` can be used with other R packages to quickly create reports. `exhibit` also has an agrument to provide some default formatting.
+\end{abstract}
+
+
+# Required Packages and Data
+
+```{r packages_and_options, message = FALSE, warning = FALSE}
+# CRAN packages
+library(dplyr) # for manipulating data
+library(ChainLadder) # reserving projections
+library(pander) # make pretty tables
+
+# Ractuary packages. Install with devtools::install_github("merlinoa/*")
+library(exhibit) # default exhibits from ChainLadder package
+library(casdata) # load in the data
+
+# set pander table options
+panderOptions('table.split.table', 125)
+panderOptions('table.alignment.default', 'right')
+```
+
+The following examples use workers' compensation paid loss and ALAE from State Farm Mutual Group.
+
+```{r data}
+# wkcomp is provided in the casdata package
+state <- filter(wkcomp, GRCODE == 1767, AccidentYear + DevelopmentLag < 1999)
+
+# create data frame for premium
+premium <- lapply(state[, c(3, 9:11)], unique)
+premium <- as.data.frame(premium)
+```
+
+`state` consists of State Farm Mutual Group workers' compensation paid and incurred losses, other information from accident years 1988 through 1997.
+
+\pagebreak
+
+## Paid Loss & ALAE Triangle
+
+```{r paid_loss_tri, results = 'asis'}
+# create paid loss triangle
+paid_tri <- as.triangle(state, origin = "AccidentYear", 
+                        dev = "DevelopmentLag", value = "CumPaidLoss_D")
+
+# format paid loss triangle for presentation
+pander(exhibit(paid_tri))
+```
+
+\pagebreak
+
+## Paid Development Triangle
+
+```{r paid_dev_tri, results = 'asis'}
+# create paid development triangle
+paid_ata <- ata(paid_tri)
+
+# format paid development triangle for presentation
+pander(exhibit(paid_ata))
+```
+
+\pagebreak
+
+# Fitting the GLM model
+
+Running the GLM model with default options is as easy as this:
+
+```{r glm, results = "asis"}
+# pander(exhibit(glmReserve(paid_tri)))
+# alternative way to write above function.
+# Helps with readability
+paid_tri %>% 
+  glmReserve() %>%
+  exhibit() %>%
+  pander()
+```
+
+If we select to use the bootstrap method to estimate the mean squared error, the `glmReserve` function provides confidence levels.
+
+```{r glm_boot, results = 'asis'}
+glm_boot <- glmReserve(paid_tri, mse.method = "boot")
+pander(exhibit(glm_boot))
+```
+
+```{r glm_cl_table, results = 'asis'}
+pr <- as.data.frame(glm_boot$sims.reserve.pred)
+qv <- c(0.5, 0.75, 0.9, 0.95, 0.975, 0.99)
+res_q <- t(apply(pr, 2, quantile, qv))
+pander(format(round(res_q), big.mark = ","))
+```
+
+Mack Chain Ladder
+
+```{r mack, results = 'asis'}
+mack <- MackChainLadder(paid_tri)
+pander(exhibit(mack))
+```
+
+Bootstrap Chain Ladder
+
+```{r boot, results = 'asis'}
+boot <- BootChainLadder(paid_tri)
+pander(exhibit(boot))
+```
