@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 \begin{abstract}
-The `ChainLadder` package can create some powerful loss reserving projections.  The output from these reserving functions is a comprehensive R list object with a lot of data.  The `exhibit` package extracts the most commonly desired `ChainLadder` function outputs and returns a data frame.  This document displays how `exhibit` can be used with other R packages to quickly create reports. `exhibit` also has an agrument to provide some default formatting.
+The `ChainLadder` package can create some powerful loss reserving projections.  The output from these reserving functions is a comprehensive R list object with a lot of data.  The `exhibit` package extracts the most commonly desired `ChainLadder` function outputs and returns a data frame summarized by origin period.  This document displays how `exhibit` can be used along with other R packages to quickly create reports. `exhibit` also includes a function to provide default formatting.
 \end{abstract}
 
 
@@ -22,6 +22,7 @@ library(pander) # make pretty tables
 library(exhibit) # default exhibits from ChainLadder package
 library(casdata) # load in the data
 
+
 # set pander table options
 panderOptions('table.split.table', 125)
 panderOptions('table.alignment.default', 'right')
@@ -29,13 +30,15 @@ panderOptions('table.alignment.default', 'right')
 
 The following examples use workers' compensation paid loss and ALAE from State Farm Mutual Group.
 
-```{r data}
+```{r data, results = "asis"}
 # wkcomp is provided in the casdata package
 state <- filter(wkcomp, GRCODE == 1767, AccidentYear + DevelopmentLag < 1999)
 
-# create data frame for premium
-premium <- lapply(state[, c(3, 9:11)], unique)
-premium <- as.data.frame(premium)
+smry <- group_by(state, AccidentYear) %>%
+  summarise(Paid = sum(CumPaidLoss_D),
+            Incurred = sum(IncurLoss_D),
+            Premium = unique(EarnedPremNet_D))
+pander(eformat(smry))
 ```
 
 `state` consists of State Farm Mutual Group workers' compensation paid and incurred losses, other information from accident years 1988 through 1997.
