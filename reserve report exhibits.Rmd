@@ -50,7 +50,7 @@ paid_tri <- as.triangle(state, origin = "AccidentYear",
                         dev = "DevelopmentLag", value = "CumPaidLoss_D")
 
 # format paid loss triangle for presentation
-pander(exhibit(paid_tri))
+pander(exhibit(paid_tri, eformat = TRUE))
 ```
 
 \pagebreak
@@ -62,7 +62,7 @@ pander(exhibit(paid_tri))
 paid_ata <- ata(paid_tri)
 
 # format paid development triangle for presentation
-pander(exhibit(paid_ata))
+pander(exhibit(paid_ata, eformat = TRUE))
 ```
 
 \pagebreak
@@ -77,7 +77,7 @@ Running the GLM model with default options is as easy as this:
 # Helps with readability
 paid_tri %>% 
   glmReserve() %>%
-  exhibit() %>%
+  exhibit(eformat = TRUE) %>%
   pander()
 ```
 
