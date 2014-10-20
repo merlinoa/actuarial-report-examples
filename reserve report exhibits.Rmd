@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 \begin{abstract}
-The `ChainLadder` package can create some powerful loss reserving projections.  The output from these reserving functions is a comprehensive R list object with a lot of data.  The `exhibit` package extracts the most commonly desired `ChainLadder` function outputs and returns a data frame summarized by origin period.  This document displays how `exhibit` can be used along with other R packages to quickly create reports. `exhibit` also includes a function to provide default formatting.
+The `ChainLadder` package can create some powerful loss reserving projections.  The output from these reserving functions is a comprehensive R list object with a lot of data.  The `exhibit` package extracts the most commonly desired `ChainLadder` function outputs and returns a data frame summarized by origin period.  This document displays how `exhibit` can be used along with other R packages to quickly create reports. `exhibit` also includes a function to provide default formatting.  For more information on the `exhibit` package download the package and enter `browseVignettes("exhibit")` to see the introductory vignette.
 \end{abstract}
 
 
@@ -28,7 +28,11 @@ panderOptions('table.split.table', 125)
 panderOptions('table.alignment.default', 'right')
 ```
 
-The following examples use workers' compensation paid loss and ALAE from State Farm Mutual Group.
+This document echos all of the code for reference.  In an actual actuarial report created with Rmarkdown it is likely you would set the knitr echo option to FALSE so that only the final table (not the code used to create the table) is visible in the final report.
+
+\pagebreak
+
+The following examples use workers' compensation paid loss and ALAE from State Farm Mutual Group.  This data is provided by the Casualty Actuarial Society and is made available in R through the `casdata` package.
 
 ```{r data, results = "asis"}
 # wkcomp is provided in the casdata package
@@ -41,9 +45,11 @@ smry <- group_by(state, AccidentYear) %>%
 pander(eformat(smry))
 ```
 
-`state` consists of State Farm Mutual Group workers' compensation paid and incurred losses, other information from accident years 1988 through 1997.
+`state` consists of State Farm Mutual Group workers' compensation paid losses, incurred losses, and other information from accident years 1988 through 1997.
 
 \pagebreak
+
+Actuaries love to look at triangles.  They also love commas in their numbers, but when using R you do not want to format your numbers with commas unless you are about to print them.  We use the eformat function to provide a default formatting immediatly before printing.
 
 ## Paid Loss & ALAE Triangle
 
@@ -53,7 +59,8 @@ paid_tri <- as.triangle(state, origin = "AccidentYear",
                         dev = "DevelopmentLag", value = "CumPaidLoss_D")
 
 # format paid loss triangle for presentation
-pander(exhibit(paid_tri, eformat = TRUE))
+paid_tri_exhibit <- exhibit(paid_tri)
+pander(eformat(paid_tri_exhibit))
 ```
 
 \pagebreak
@@ -64,50 +71,60 @@ pander(exhibit(paid_tri, eformat = TRUE))
 # create paid development triangle
 paid_ata <- ata(paid_tri)
 
+paid_ata <- exhibit(paid_ata)
 # format paid development triangle for presentation
-pander(exhibit(paid_ata, eformat = TRUE))
+pander(eformat(paid_ata))
 ```
 
 \pagebreak
 
-# Fitting the GLM model
+# GLM Reserving model
 
 Running the GLM model with default options is as easy as this:
 
 ```{r glm, results = "asis"}
-# pander(exhibit(glmReserve(paid_tri)))
-# alternative way to write above function.
-# Helps with readability
-paid_tri %>% 
-  glmReserve() %>%
-  exhibit(eformat = TRUE) %>%
-  pander()
+glm_reserve <- exhibit(glmReserve(paid_tri))
+
+pander(eformat(glm_reserve))
 ```
+
+\pagebreak
 
 If we select to use the bootstrap method to estimate the mean squared error, the `glmReserve` function provides confidence levels.
 
 ```{r glm_boot, results = 'asis'}
 glm_boot <- glmReserve(paid_tri, mse.method = "boot")
-pander(exhibit(glm_boot))
+glm_boot_exhibit <- exhibit(glm_boot)
+
+pander(eformat(glm_boot_exhibit))
 ```
+
+\pagebreak
 
 ```{r glm_cl_table, results = 'asis'}
 pr <- as.data.frame(glm_boot$sims.reserve.pred)
 qv <- c(0.5, 0.75, 0.9, 0.95, 0.975, 0.99)
 res_q <- t(apply(pr, 2, quantile, qv))
-pander(format(round(res_q), big.mark = ","))
+pander(eformat(as.data.frame(res_q)))
 ```
+
+\pagebreak
 
 Mack Chain Ladder
 
 ```{r mack, results = 'asis'}
 mack <- MackChainLadder(paid_tri)
-pander(exhibit(mack))
+mack <- exhibit(mack)
+
+pander(eformat(mack))
 ```
 
 Bootstrap Chain Ladder
 
 ```{r boot, results = 'asis'}
 boot <- BootChainLadder(paid_tri)
-pander(exhibit(boot))
+
+boot <- exhibit(boot)
+
+pander(eformat(boot))
 ```
