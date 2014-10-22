@@ -1,20 +1,18 @@
 ---
-title: "Default Data Frames for the ChainLadder Package"
+title: "Creating Reports with ChainLadder Package Reserve Projections"
 author: "Andy Merlino"
-date: "Friday, October 17, 2014"
+date: "Thusday, October 23, 2014"
 output: pdf_document
 ---
 
 \begin{abstract}
-The `ChainLadder` package can create some powerful loss reserving projections.  The output from these reserving functions is a comprehensive R list object with a lot of data.  The `exhibit` package extracts the most commonly desired `ChainLadder` function outputs and returns a data frame summarized by origin period.  This document displays how `exhibit` can be used along with other R packages to quickly create reports. `exhibit` also includes a function to provide default formatting.  For more information on the `exhibit` package download the package and enter `browseVignettes("exhibit")` to see the introductory vignette.
+The `ChainLadder` package can create some powerful loss reserving projections.  The output from these reserving functions is a list containing all the relevant data an actuary would ever want.  The `exhibit` package extracts the most commonly desired `ChainLadder` function outputs and returns a data frame ready for a report.  This document displays how `exhibit` can be used along with other R packages to quickly create reports.  For more information on the `exhibit` package download the package and enter `browseVignettes("exhibit")` to see the introductory vignette.
 \end{abstract}
-
 
 # Required Packages and Data
 
 ```{r packages_and_options, message = FALSE, warning = FALSE}
 # CRAN packages
-library(dplyr) # for manipulating data
 library(ChainLadder) # reserving projections
 library(pander) # make pretty tables
 
@@ -22,45 +20,47 @@ library(pander) # make pretty tables
 library(exhibit) # default exhibits from ChainLadder package
 library(casdata) # load in the data
 
-
 # set pander table options
 panderOptions('table.split.table', 125)
 panderOptions('table.alignment.default', 'right')
 ```
 
-This document echos all of the code for reference.  In an actual actuarial report created with Rmarkdown it is likely you would set the knitr echo option to FALSE so that only the final table (not the code used to create the table) is visible in the final report.
+This document echos all of the code because it is intended as a reference document.  In an actual actuarial report only the final table would be displayed.
 
-\pagebreak
+The following examples use workers' compensation paid loss and ALAE from State Farm Mutual Group.  This data is provided by the [Casualty Actuarial Society](http://www.casact.org/research/index.cfm?fa=loss_reserves_data) and is made available in R through the `casdata` package.
 
-The following examples use workers' compensation paid loss and ALAE from State Farm Mutual Group.  This data is provided by the Casualty Actuarial Society and is made available in R through the `casdata` package.
-
-```{r data, results = "asis"}
-# wkcomp is provided in the casdata package
-state <- filter(wkcomp, GRCODE == 1767, AccidentYear + DevelopmentLag < 1999)
-
-smry <- group_by(state, AccidentYear) %>%
-  summarise(Paid = sum(CumPaidLoss_D),
-            Incurred = sum(IncurLoss_D),
-            Premium = unique(EarnedPremNet_D))
-pander(eformat(smry))
+```{r data}
+# filter the data to be used in our projections
+calendar <- wkcomp$AccidentYear + wkcomp$DevelopmentLag
+state <- wkcomp[wkcomp$GRCODE == 1767 & calendar < 1999, ]
 ```
 
 `state` consists of State Farm Mutual Group workers' compensation paid losses, incurred losses, and other information from accident years 1988 through 1997.
 
 \pagebreak
 
-Actuaries love to look at triangles.  They also love commas in their numbers, but when using R you do not want to format your numbers with commas unless you are about to print them.  We use the eformat function to provide a default formatting immediatly before printing.
+Each code chuck operates as follows:
+
+1. Use a `ChainLadder` function to make a reserve projection.
+2. Use `exhibit()` to extract a data frame summary of that projection.
+3. Use `eformat()` to apply a default format to the data frame returned by `exhibit()`.
+4. Use `pander()` to make the table look good.
 
 ## Paid Loss & ALAE Triangle
 
 ```{r paid_loss_tri, results = 'asis'}
 # create paid loss triangle
-paid_tri <- as.triangle(state, origin = "AccidentYear", 
+paid_tri <- as.triangle(state, origin = "AccidentYear",
                         dev = "DevelopmentLag", value = "CumPaidLoss_D")
 
-# format paid loss triangle for presentation
-paid_tri_exhibit <- exhibit(paid_tri)
-pander(eformat(paid_tri_exhibit))
+# extracts a summary, format it, make it into a table
+pander(exhibit(paid_tri, eformat = TRUE))
+
+# Because you may want to have the unformatted output of exhibit
+# for later use in an actuarial report, the above command can 
+# also be executed like so.
+# exhibit_paid_tri <- exhibit(paid_tri)
+# pander(eformat(paid_tri))
 ```
 
 \pagebreak
