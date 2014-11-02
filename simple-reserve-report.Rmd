@@ -22,9 +22,14 @@ Blah blah...
 
 \pagebreak
 
-## Analysis
+## Conclusions
 
 A summary of our estimated ultimate loss & ALAE and the indicated total outstanding loss & ALAE:
+
+
+## Methodology
+
+We used two actuarial projection techniques (paid projection and incurred projection) in creating the final estimated ultimate loss projection.  The loss projections look at the loss experience for the more mature accident years to predict the development of less mature development years.  Details on the paid projection and incurred projection can be found in Exhibit II, and Exhibit III respectively.
 
 ```{r packages_options, message = FALSE, warning = FALSE, echo = FALSE}
 # CRAN packages
@@ -58,11 +63,6 @@ names(latest) <- c("AccidentYear", "Paid", "Incurred", "Premium")
 
 \pagebreak
 
-\begin{flushright}
-Exhibit II
-\\*Sheet 2
-\end{flushright}
-
 
 ```{r paid_triangle, echo = FALSE}
 paid_tri <- as.triangle(state, 
@@ -70,22 +70,32 @@ paid_tri <- as.triangle(state,
                         dev = "DevelopmentLag",
                         value = "CumPaidLoss_D")
 
-pander(exhibit(paid_tri, eformat = TRUE))
-
 paid_select <- c(2.7, 1.35, 1.55, 1.08, 1.05, 1.03, 1.025, 1.015, 
             1.013, 1.15)
 paid_ata <- exhibit(ata(paid_tri), selection = paid_select, 
                     tail_column = TRUE)
-pander(eformat(paid_ata), caption = "Paid Development Triangles")
 ```
 
 \pagebreak
 
 ```{r paid_projection, echo = FALSE}
-paid_proj <- data.frame(latest[, 1:2], ldf = cumprod(rev(paid_select)))
+paid_proj <- data.frame(latest[, 2, drop = FALSE], ldf = cumprod(rev(paid_select)))
 paid_proj <- mutate(paid_proj, 
                     Ultimate = Paid * ldf)
-pander(eformat(paid_proj))
+rownames(paid_proj) <- latest$AccidentYear
+pander(eformat(paid_proj), caption = "Paid Projection")
+```
+
+\pagebreak
+
+\begin{flushright}
+Exhibit II
+\\*Sheet 2
+\end{flushright}
+
+```{r paid_triangle_tables, echo = FALSE}
+pander(exhibit(paid_tri, eformat = TRUE))
+pander(eformat(paid_ata))
 ```
 
 \pagebreak
@@ -96,12 +106,9 @@ incurred_tri <- as.triangle(state,
                         dev = "DevelopmentLag",
                         value = "IncurLoss_D")
 
-pander(exhibit(incurred_tri, eformat = TRUE))
-
 incurred_select <- c(1.16, 1.05, 1.01, 1.005, 1.001, 1, 1, 1, 1, 1.005)
 incurred_ata <- exhibit(ata(incurred_tri), selection = incurred_select, 
                     tail_column = TRUE)
-pander(eformat(incurred_ata), caption = "Incurred Development Triangles")
 ```
 
 \pagebreak
@@ -111,4 +118,11 @@ incurred_proj <- data.frame(latest[, c(1, 3)], ldf = cumprod(rev(incurred_select
 incurred_proj <- mutate(incurred_proj, 
                     Ultimate = Incurred * ldf)
 pander(eformat(incurred_proj))
+```
+
+\pagebreak
+
+```{r incurred_triangle_tables, echo = FALSE}
+pander(exhibit(incurred_tri, eformat = TRUE))
+pander(eformat(incurred_ata))
 ```
