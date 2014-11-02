@@ -8,11 +8,9 @@ output: pdf_document
 I am going to display how a very simple reserve report could be created using R.  This document is only for display purposes.  It was created using data freely available on the CAS website.
 \end{abstract}
 
-\pagebreak
-
 ## Purpose
 
-Ractuary has been requested by Nsure Ance Company (NAC) to provide a reserve estimate for their workers' compensation loss and loss alocated adjustment expense.  Losses are evaluated as of December 31, 1997... 
+Ractuary has been requested by Nsure Ance Company (NAC) to provide a reserve estimate for their workers' compensation loss and loss alocated adjustment expense (ALAE) reserves.  Losses are evaluated as of December 31, 1997... 
 
 ## Background
 
@@ -20,13 +18,15 @@ NAC began offering workers' compensation coverage in 1988.  Each policy is writt
 
 ## Other Stuff
 
+Blah blah...
+
 \pagebreak
 
 ## Analysis
 
 A summary of our estimated ultimate loss & ALAE and the indicated total outstanding loss & ALAE:
 
-```{r packages_and_options, message = FALSE, warning = FALSE}
+```{r packages_options, message = FALSE, warning = FALSE, echo = FALSE}
 # CRAN packages
 library(dplyr) # for manipulating data
 library(ChainLadder) # reserving projections
@@ -41,7 +41,7 @@ panderOptions('table.split.table', 125)
 panderOptions('table.alignment.default', 'right')
 ```
 
-```{r data}
+```{r data, echo = FALSE}
 # filter the data to be used in our projections
 wkcomp$calendar <- wkcomp$AccidentYear + wkcomp$DevelopmentLag
 state <- wkcomp[wkcomp$GRCODE == 1767 & wkcomp$calendar < 1999, ]
@@ -56,6 +56,14 @@ latest <- filter(state, calendar == 1998) %>%
 names(latest) <- c("AccidentYear", "Paid", "Incurred", "Premium")
 ```
 
+\pagebreak
+
+\begin{flushright}
+Exhibit II
+\\*Sheet 2
+\end{flushright}
+
+
 ```{r paid_triangle, echo = FALSE}
 paid_tri <- as.triangle(state, 
                         origin = "AccidentYear", 
@@ -64,16 +72,43 @@ paid_tri <- as.triangle(state,
 
 pander(exhibit(paid_tri, eformat = TRUE))
 
-select <- c(2.7, 1.35, 1.55, 1.08, 1.05, 1.03, 1.025, 1.015, 
+paid_select <- c(2.7, 1.35, 1.55, 1.08, 1.05, 1.03, 1.025, 1.015, 
             1.013, 1.15)
-paid_ata <- exhibit(ata(paid_tri), selection = select, 
+paid_ata <- exhibit(ata(paid_tri), selection = paid_select, 
                     tail_column = TRUE)
-pander(eformat(paid_ata))
+pander(eformat(paid_ata), caption = "Paid Development Triangles")
 ```
 
-```{r}
-paid_proj <- data.frame(latest[, 1:2], ldf = cumprod(rev(select)))
+\pagebreak
+
+```{r paid_projection, echo = FALSE}
+paid_proj <- data.frame(latest[, 1:2], ldf = cumprod(rev(paid_select)))
 paid_proj <- mutate(paid_proj, 
                     Ultimate = Paid * ldf)
 pander(eformat(paid_proj))
+```
+
+\pagebreak
+
+```{r incurred_triangle, echo = FALSE}
+incurred_tri <- as.triangle(state, 
+                        origin = "AccidentYear", 
+                        dev = "DevelopmentLag",
+                        value = "IncurLoss_D")
+
+pander(exhibit(incurred_tri, eformat = TRUE))
+
+incurred_select <- c(1.16, 1.05, 1.01, 1.005, 1.001, 1, 1, 1, 1, 1.005)
+incurred_ata <- exhibit(ata(incurred_tri), selection = incurred_select, 
+                    tail_column = TRUE)
+pander(eformat(incurred_ata), caption = "Incurred Development Triangles")
+```
+
+\pagebreak
+
+```{r incurred_projection, echo = FALSE}
+incurred_proj <- data.frame(latest[, c(1, 3)], ldf = cumprod(rev(incurred_select)))
+incurred_proj <- mutate(incurred_proj, 
+                    Ultimate = Incurred * ldf)
+pander(eformat(incurred_proj))
 ```
