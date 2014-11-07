@@ -1,16 +1,19 @@
 ---
 title: "Simple Reserve Report Example"
 author: "Andy Merlino"
-date: "11/5/2014"
+date: "11/7/2014"
 output: pdf_document
 ---
 \begin{abstract}
-I am going to display how a very simple reserve report could be created using R.  This document is only for display purposes.  It was created using data freely available on the CAS website.  This could be greatly improved by having better notes and table identifiers.  I am just getting started with Latex and will have cleaner reports in subsequent examples.
+This document demonstrates how a very simple actuarial reserve report could be created using R.  This document is only for display purposes.  It was created using insurance loss data freely available on the CAS website.  This report could be greatly improved by having better documentation for the relationships among tables.  I am just getting started with LaTex and will have more clearly documented reports in subsequent examples.
 \end{abstract}
 
+```{r generic_info, echo = FALSE}
+eval_date <- "December 31, 1997"
+```
 ## Purpose
 
-Ractuary has been requested by Nsure Ance Company (NAC) to provide a reserve estimate for their workers' compensation loss and alocated loss adjustment expense (ALAE) reserves.  Losses are evaluated as of December 31, 1997... 
+Ractuary was requested by Nsure Ance Company (NAC) to provide a reserve estimate for their workers' compensation loss and alocated loss adjustment expense (ALAE) reserves.  Losses are evaluated as of `r eval_date`... 
 
 ## Background
 
@@ -48,9 +51,8 @@ state <- wkcomp[wkcomp$GRCODE == 1767 & wkcomp$calendar < 1999, ]
 latest <- filter(state, calendar == 1998) %>% 
   select(AccidentYear,
          CumPaidLoss_D,
-         IncurLoss_D,
-         EarnedPremNet_D)
-names(latest) <- c("AccidentYear", "Paid", "Incurred", "Premium")
+         IncurLoss_D)
+names(latest) <- c("year", "paid", "incurred")
 
 # create paid development triangles =============================
 paid_tri <- as.triangle(state, 
@@ -66,8 +68,8 @@ paid_ata <- exhibit(ata(paid_tri), selection = paid_select,
 # create paid projection table ==================================
 paid_proj <- data.frame(latest[, 2, drop = FALSE], ldf = cumprod(rev(paid_select)))
 paid_proj <- mutate(paid_proj, 
-                    Ultimate = Paid * ldf)
-rownames(paid_proj) <- latest$AccidentYear
+                    ultimate = paid * ldf)
+rownames(paid_proj) <- latest$year
 
 
 # create incurred development triangles ========================
@@ -81,15 +83,16 @@ incurred_ata <- exhibit(ata(incurred_tri), selection = incurred_select,
                     tail_column = TRUE)
 
 # create incurred projection table ============================
-incurred_proj <- data.frame(latest[, c(1, 3)], ldf = cumprod(rev(incurred_select)))
+incurred_proj <- data.frame(latest[, 3, drop = FALSE], ldf = cumprod(rev(incurred_select)))
 incurred_proj <- mutate(incurred_proj, 
-                    Ultimate = Incurred * ldf)
+                    ultimate = incurred * ldf)
+rownames(incurred_proj) <- latest$year
 
 # ultimate selection exhibit ==================================
-ultimate_selection <- data.frame(Paid_Projection = paid_proj$Ultimate,
-                                 Incurred_Projection = incurred_proj$Ultimate)
+ultimate_selection <- data.frame(paid_projection = paid_proj$ultimate,
+                                 incurred_projection = incurred_proj$ultimate)
 ultimate_selection <- mutate(ultimate_selection,
-                             Selected_Ultimate = (Paid_Projection + Incurred_Projection) / 2
+                             selected_ultimate = (paid_projection + incurred_projection) / 2
                              )
 ```
 
@@ -99,26 +102,29 @@ A summary of our reserve analysis is as follows:
 
 ```{r final_summary, echo = FALSE}
 smry <- data.frame(latest[, 2:3], 
-                   Selected_Ultimate = ultimate_selection$Selected_Ultimate
+                   selected_ultimate = ultimate_selection$selected_ultimate
                    )
 
 smry <- mutate(smry, 
-               Case_OS = Incurred - Paid,
-               IBNR = Selected_Ultimate - Incurred,
-               Total_OS = Case_OS + IBNR)
+               case_os = incurred - paid,
+               ibnr = selected_ultimate - incurred,
+               total_os = case_os + ibnr)
 
 smry_totals <- lapply(smry, sum)
 
 smry <- rbind(smry, smry_totals)
 
-rownames(smry) <- c(latest$AccidentYear, "Totals:")
+rownames(smry) <- c(latest$year, "Totals:")
 
-pander(eformat(smry), caption = "Report Summary")
+pander(eformat(smry, colnames = c("Paid", "Incurred", "Ultimate", "Case OS", "IBNR", "Total OS"))
+       , caption = "Report Summary")
 ```
+
+From the table above, estimated ultimate loss & ALAE as of `r eval_date` is `r format(smry_totals[3], big.mark = ",")` indicating a total outstanding loss & ALAE of `r format(smry_totals[6], big.mark = ",")`.
 
 ## Methodology
 
-We used two actuarial projection techniques (paid projection and incurred projection) in creating the final estimated ultimate loss projection.  The loss projections use loss experience for the more mature accident years to predict the development of less mature accident years. See the following exhibits for detail regarding the projections and estimated ultimate loss and ALAE selection.
+We used two actuarial projection techniques (paid projection and incurred projection) in creating the final estimated ultimate loss projection.  The loss projections use loss experience for the more mature accident years to estimate the development of less mature accident years. See the following exhibits for detail regarding the projections and estimated ultimate loss and ALAE selection.
 
 \pagebreak
 
@@ -127,14 +133,16 @@ We used two actuarial projection techniques (paid projection and incurred projec
 ```{r ultimate_selection, echo = FALSE}
 ult_selection_totals <- lapply(ultimate_selection, sum)
 ult_selection <- rbind(ultimate_selection, ult_selection_totals)
-rownames(ult_selection) <- c(latest$AccidentYear, "Totals:")
-pander(eformat(ult_selection), caption = "Selection of Ultimate Loss & ALAE Estimate")
+rownames(ult_selection) <- c(latest$year, "Totals:")
+pander(eformat(ult_selection, colnames = c("Paid Projection", "Incurred Projection", "Selected Ultimate")), 
+       caption = "Selection of Estimated Ultimate Loss & ALAE")
 ```
 
 \pagebreak
 
 ```{r paid_projection_exhibit, echo = FALSE}
-pander(eformat(paid_proj), caption = "Paid Projection")
+pander(eformat(paid_proj, colnames = c("Paid", "LDF", "Ultimate")),
+       caption = "Paid Projection")
 ```
 
 \pagebreak
@@ -148,7 +156,8 @@ pander(eformat(paid_ata), caption = "Paid Development Factor Triangle")
 
 ```{r incurred_projection_exhibit, echo = FALSE}
 # Incurred projection exhibit
-pander(eformat(incurred_proj), caption = "Incurred Projection")
+pander(eformat(incurred_proj, colnames = c("Incurred", "LDF", "Ultimate")),
+       caption = "Incurred Projection")
 ```
 
 \pagebreak
