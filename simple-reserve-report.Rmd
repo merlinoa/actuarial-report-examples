@@ -2,7 +2,10 @@
 title: "Simple Reserve Report Example"
 author: "Andy Merlino"
 date: "11/7/2014"
-output: pdf_document
+output: 
+  pdf_document:
+    toc: true
+    fig_caption: true
 ---
 \begin{abstract}
 This document demonstrates how a very simple actuarial reserve report could be created using R.  This document is only for display purposes.  It was created using insurance loss data freely available on the CAS website.  This report could be greatly improved by having better documentation for the relationships among tables.  I am just getting started with LaTex and will have more clearly documented reports in subsequent examples.
@@ -114,11 +117,20 @@ smry_totals <- lapply(smry, sum)
 
 smry <- rbind(smry, smry_totals)
 
-rownames(smry) <- c(latest$year, "Totals:")
+rownames(smry) <- c(latest$year, "Totals")
 
-pander(eformat(smry, colnames = c("Paid", "Incurred", "Ultimate", "Case OS", "IBNR", "Total OS"))
-       , caption = "Report Summary")
+pander(eformat(smry, colnames = c("Paid[^1]", "Incurred[^2]", "Ultimate[^3]", "Case OS", "IBNR", "Total OS")))
 ```
+
+[^1]: random note
+[^2]: random note
+[^3]: random note
+
+>Notes:  
+>
+>>1: See Exhibit II, Sheet 1.  
+>>2: See Exhibit III, Sheet 1.  
+>>3: See Exhibit I.
 
 From the table above, estimated ultimate loss & ALAE as of `r eval_date` is `r format(smry_totals[3], big.mark = ",")` indicating a total outstanding loss & ALAE of `r format(smry_totals[6], big.mark = ",")`.
 
@@ -133,7 +145,7 @@ We used two actuarial projection techniques (paid projection and incurred projec
 ```{r ultimate_selection, echo = FALSE}
 ult_selection_totals <- lapply(ultimate_selection, sum)
 ult_selection <- rbind(ultimate_selection, ult_selection_totals)
-rownames(ult_selection) <- c(latest$year, "Totals:")
+rownames(ult_selection) <- c(latest$year, "Totals")
 pander(eformat(ult_selection, colnames = c("Paid Projection", "Incurred Projection", "Selected Ultimate")), 
        caption = "Selection of Estimated Ultimate Loss & ALAE")
 ```
@@ -156,8 +168,7 @@ pander(eformat(paid_ata), caption = "Paid Development Factor Triangle")
 
 ```{r incurred_projection_exhibit, echo = FALSE}
 # Incurred projection exhibit
-pander(eformat(incurred_proj, colnames = c("Incurred", "LDF", "Ultimate")),
-       caption = "Incurred Projection")
+pander(eformat(incurred_proj, colnames = c("Incurred", "LDF", "Ultimate")))
 ```
 
 \pagebreak
