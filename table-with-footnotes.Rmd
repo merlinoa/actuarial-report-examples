@@ -16,21 +16,6 @@ df <- data.frame("col.one" = c(1.1, 9.9, 2.3), "col.two" = c(4, 7, 8))
 rownames(df) <- c("A", "B", "C")
 ```
 
-When we create a table using R code there are several packages we can use generate the markdown and then the LaTeX code to create footnotes.  We want our table to look like this.
-
---------------------------------------------------
-    &nbsp;         col.one           col.two   
--------------- ------------------ ----------------
-    **A**            1.1               1.4        
-
-    **B**            9.9               1.4        
-
-    **C**            2.3               1.3        
---------------------------------------------------
-
-[^1]: Random note a
-[^2]: Random note b
-
 \pagebreak
 
 ## The pander package
@@ -44,9 +29,16 @@ pander(df)
 
 ```{r, results = "asis"}
 library(xtable)
-
-df_table <- xtable(df,label='tabbig', caption='Example of longtable')
+df_table <- xtable(df, label='tab:Exhibit-I', caption='Example of longtable')
 names(df_table)[1] <- paste("col one",'footnote')
-print(df_table, tabular.environment = 'longtable', floating=FALSE,
-      sanitize.text.function = function(str) gsub("footnote","\\footnote{my tricky footnote !!}", str, fixed=TRUE))
+print(df_table, tabular.environment = 'longtable', floating=FALSE, 
+      sanitize.text.function = function(str) gsub("footnote","\\footnote{example footnote}", str, fixed=TRUE))
 ```
+
+
+
+
+\pagebreak
+
+
+Go to \hyperref[tab:Exhibit-I]{Exhibit-I}
