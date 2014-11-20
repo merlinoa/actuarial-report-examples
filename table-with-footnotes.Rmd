@@ -1,17 +1,16 @@
 ---
 title: "Table with Footnotes"
 author: "Andy Merlino"
-date: "Monday, November 17, 2014"
+date: "Thursday, November 20, 2014"
 output: 
     pdf_document:
         includes:
             in_header: mystyles.sty
 ---
 
-Attempting to create a \LaTeX\ table with good footnotes.  I need the table to be generated using an existing R package for generating \LaTeX\ tables from R code.
+Attempting to create a \LaTeX\ table with good footnotes.  I need the table to be generated using an existing R package for generating \LaTeX\ tables from R code.  Thus, the footnote command cannot be directly typed into the table; it must flow through the R package for table generation.
 
-### Create the table
-```{r}
+```{r, echo = FALSE}
 # an arbitrary example of a simple data frame
 df <- data.frame("col.one" = c(1.1, 9.9, 2.3), "col.two" = c(4, 7, 8),
                  "col.three" = c(TRUE, TRUE, FALSE))
@@ -23,32 +22,35 @@ rownames(df) <- c("A", "B", "C")
 This seems to be the best option:
 
 \captionsetup{labelformat=empty}
-```{r, results = "asis"}
+```{r, results = "asis", echo = FALSE}
 library(xtable)
 
 options(xtable.comment = FALSE)
 
-df_table <- xtable(df, label='tab:Exhibit-I', caption='Example nice table')
+df_table <- xtable(df, label='Exhibit-I-Sheet1', caption = "Exhibit I, Sheet 1")
 
 
 # allignment of each column and column borders
-align(df_table) <- "r|rrr"
+align(df_table) <- "lrrr"
 
 # to add one footnote to table columns "$\\footnote{can LaTeX see me?}$"
 
-names(df_table)[1] <- "col.one$\\footnote{footnote for column 1}$"
-names(df_table)[3] <- "col.three$\\footnote{footnote for column 3}$"
+names(df_table)[1] <- "col.one$\\footnotemark[1]$"
+names(df_table)[2] <- "col.two$\\footnotemark[1]$"
+names(df_table)[3] <- "col.three$\\footnotemark[2]$"
 
 print(df_table, 
       tabular.environment = 'longtable',
       floating = FALSE,
       sanitize.colnames.function = identity,
-      caption.placement = "bottom",
+      caption.placement = "top",
       booktabs = TRUE)
 ```
 
+\footnotetext[1]{This is my first explicit footnote}
+\footnotetext[2]{This is my second explicit footnote}
 
 \pagebreak
 
 
-For more information see \hyperref[tab:Exhibit-I]{Exhibit-I}
+For more information see \hyperref[Exhibit-I-Sheet1]{Exhibit I, Sheet 1}
