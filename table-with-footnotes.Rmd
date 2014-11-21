@@ -6,6 +6,11 @@ output:
     pdf_document:
         includes:
             in_header: mystyles.sty
+geometry: margin=1.25in
+fontsize: 12pt
+linkcolor: blue
+urlcolor: blue
+citecolor: blue
 ---
 
 Attempting to create a \LaTeX\ table with good footnotes.  I need the table to be generated using an existing R package for generating \LaTeX\ tables from R code.  Thus, the footnote command cannot be directly typed into the table; it must flow through the R package for table generation.
