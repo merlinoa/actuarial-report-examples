@@ -63,8 +63,7 @@ paid_tri <- as.triangle(state,
 
 paid_select <- c(2.7, 1.35, 1.55, 1.08, 1.05, 1.03, 1.025, 1.015, 
             1.013, 1.15)
-paid_ata <- exhibit(ata(paid_tri), selection = paid_select, 
-                    tail_column = TRUE)
+paid_ata <- exhibit(ata(paid_tri), selection = paid_select)
 
 # create paid projection table ==================================
 paid_proj <- data.frame(latest[, 2, drop = FALSE], ldf = cumprod(rev(paid_select)))
@@ -80,8 +79,7 @@ incurred_tri <- as.triangle(state,
                         value = "IncurLoss_D")
 
 incurred_select <- c(1.16, 1.05, 1.01, 1.005, 1.001, 1, 1, 1, 1, 1.005)
-incurred_ata <- exhibit(ata(incurred_tri), selection = incurred_select, 
-                    tail_column = TRUE)
+incurred_ata <- exhibit(ata(incurred_tri), selection = incurred_select)
 
 # create incurred projection table ============================
 incurred_proj <- data.frame(latest[, 3, drop = FALSE], ldf = cumprod(rev(incurred_select)))
@@ -117,7 +115,9 @@ smry <- rbind(smry, smry_totals)
 
 rownames(smry) <- c(latest$year, "Totals")
 
-pander(eformat(smry, colnames = c("Paid", "Incurred", "Ultimate", "Case OS", "IBNR", "Total OS")))
+smry_out <- smry
+names(smry_out) <- c("Paid", "Incurred", "Ultimate", "Case OS", "IBNR", "Total OS")
+pander(smry_out)
 ```
 
 From the table above, estimated ultimate loss & ALAE as of `r eval_date` is `r format(smry_totals[3], big.mark = ",")` indicating a total outstanding loss & ALAE of `r format(smry_totals[6], big.mark = ",")`.
@@ -134,34 +134,42 @@ We used two actuarial projection techniques (paid projection and incurred projec
 ult_selection_totals <- lapply(ultimate_selection, sum)
 ult_selection <- rbind(ultimate_selection, ult_selection_totals)
 rownames(ult_selection) <- c(latest$year, "Totals")
-pander(eformat(ult_selection, colnames = c("Paid Projection", "Incurred Projection", "Selected Ultimate")), 
-       caption = "Selection of Estimated Ultimate Loss & ALAE")
+
+# rename columns and print ultimate selection table to pdf
+ult_selection_out <- ult_selection
+names(ult_selection_out) <- c("Paid Projection", "Incurred Projection", "Selected Ultimate")
+pander(ult_selection_out, caption = "Selection of Estimated Ultimate Loss & ALAE")
 ```
 
 \pagebreak
 
 ```{r paid_projection_exhibit, echo = FALSE}
-pander(eformat(paid_proj, colnames = c("Paid", "LDF", "Ultimate")),
+# print paid projections exhibit to pdf
+paid_proj_out <- paid_proj
+names(paid_proj_out) <- c("Paid", "LDF", "Ultimate")
+pander(paid_proj_out,
        caption = "Paid Projection")
 ```
 
 \pagebreak
 
 ```{r paid_triangle_tables, echo = FALSE}
-pander(exhibit(paid_tri, eformat = TRUE), caption = "Paid Triangle")
-pander(eformat(paid_ata), caption = "Paid Development Factor Triangle")
+pander(exhibit(paid_tri), caption = "Paid Triangle")
+pander(paid_ata, caption = "Paid Development Factor Triangle")
 ```
 
 \pagebreak
 
 ```{r incurred_projection_exhibit, echo = FALSE}
 # Incurred projection exhibit
-pander(eformat(incurred_proj, colnames = c("Incurred", "LDF", "Ultimate")))
+incurred_proj_out <- incurred_proj
+names(incurred_proj_out) <- c("Incurred", "LDF", "Ultimate")
+pander(incurred_proj_out)
 ```
 
 \pagebreak
 
 ```{r incurred_triangle_tables, echo = FALSE}
-pander(exhibit(incurred_tri, eformat = TRUE), caption = "Incurred Triangle")
-pander(eformat(incurred_ata), caption = "Incurred Development Factor Triangle")
+pander(exhibit(incurred_tri), caption = "Incurred Triangle")
+pander(incurred_ata, caption = "Incurred Development Factor Triangle")
 ```
