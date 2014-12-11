@@ -16,7 +16,7 @@ citecolor: blue
 Attempting to create a \LaTeX\ table with good footnotes.  I need the table to be generated using an existing R package for generating \LaTeX\ tables from R code.  Thus, the footnote command cannot be directly typed into the table; it must flow through the R package for table generation.
 
 ```{r, echo = FALSE}
-# an arbitrary example of a simple data frame
+# an example simple data frame
 df <- data.frame("col.one" = c(1.1, 9.9, 2.3), "col.two" = c(4, 7, 8),
                  "col.three" = c(TRUE, TRUE, FALSE))
 rownames(df) <- c("A", "B", "C")
@@ -29,17 +29,16 @@ This seems to be the best option:
 \captionsetup{labelformat=empty}
 ```{r, results = "asis", echo = FALSE}
 library(xtable)
-
 options(xtable.comment = FALSE)
 
-df_table <- xtable(df, label='Exhibit-I-Sheet1', caption = "Exhibit I, Sheet 1")
+df_table <- xtable(df, caption = "Exhibit I")
 
 
 # allignment of each column and column borders
 align(df_table) <- "lrrr"
 
-# to add one footnote to table columns "$\\footnote{can LaTeX see me?}$"
 
+# add footnotes to table column names
 names(df_table)[1] <- "col.one$\\footnotemark[1]$"
 names(df_table)[2] <- "col.two$\\footnotemark[1]$"
 names(df_table)[3] <- "col.three$\\footnotemark[2]$"
@@ -54,8 +53,3 @@ print(df_table,
 
 \footnotetext[1]{This is my first explicit footnote}
 \footnotetext[2]{This is my second explicit footnote}
-
-\pagebreak
-
-
-For more information see \hyperref[Exhibit-I-Sheet1]{Exhibit I, Sheet 1}
