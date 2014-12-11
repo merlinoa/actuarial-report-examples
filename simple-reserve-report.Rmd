@@ -117,18 +117,8 @@ smry <- rbind(smry, smry_totals)
 
 rownames(smry) <- c(latest$year, "Totals")
 
-pander(eformat(smry, colnames = c("Paid[^1]", "Incurred[^2]", "Ultimate[^3]", "Case OS", "IBNR", "Total OS")))
+pander(eformat(smry, colnames = c("Paid", "Incurred", "Ultimate", "Case OS", "IBNR", "Total OS")))
 ```
-
-[^1]: random note
-[^2]: random note
-[^3]: random note
-
->Notes:  
->
->>1: See Exhibit II, Sheet 1.  
->>2: See Exhibit III, Sheet 1.  
->>3: See Exhibit I.
 
 From the table above, estimated ultimate loss & ALAE as of `r eval_date` is `r format(smry_totals[3], big.mark = ",")` indicating a total outstanding loss & ALAE of `r format(smry_totals[6], big.mark = ",")`.
 
