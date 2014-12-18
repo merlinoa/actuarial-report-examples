@@ -1,14 +1,17 @@
 ---
 title: "Simple Reserve Report Example"
 author: "Andy Merlino"
-date: "11/7/2014"
+date: "12/18/2014"
 output: 
-  pdf_document
+  pdf_document:
+        includes:
+            in_header: mystyles.sty
 ---
 \begin{abstract}
 This document demonstrates how a very simple actuarial reserve report could be created using R.  This document is only for display purposes.  It was created using insurance loss data freely available on the CAS website.  This report could be greatly improved by having better documentation for the relationships among tables.  I am just getting started with \LaTeX\ and will have more clearly documented reports in subsequent examples.
 \end{abstract}
 
+\captionsetup{labelformat=empty}
 ```{r generic_info, echo = FALSE}
 eval_date <- "December 31, 1997"
 ```
@@ -30,15 +33,12 @@ Blah blah...
 # CRAN packages
 library(dplyr) # for manipulating data
 library(ChainLadder) # reserving projections
-library(pander) # make pretty tables
+library(xtable) # make pretty tables
+options(xtable.comment = FALSE) # xtable option
 
 # Ractuary packages. Install with devtools::install_github("merlinoa/*")
 library(exhibit) # default exhibits from ChainLadder package
 library(casdata) # load in the data
-
-# set pander table options
-panderOptions('table.split.table', 125)
-panderOptions('table.alignment.default', 'right')
 ```
 
 ```{r data, echo = FALSE}
@@ -99,7 +99,7 @@ ultimate_selection <- mutate(ultimate_selection,
 
 A summary of our reserve analysis is as follows:
 
-```{r final_summary, echo = FALSE}
+```{r final_summary, echo = FALSE, results = "asis"}
 smry <- data.frame(latest[, 2:3], 
                    selected_ultimate = ultimate_selection$selected_ultimate
                    )
@@ -115,10 +115,26 @@ smry <- rbind(smry, smry_totals)
 
 rownames(smry) <- c(latest$year, "Totals")
 
-smry_out <- smry
-names(smry_out) <- c("Paid", "Incurred", "Ultimate", "Case OS", "IBNR", "Total OS")
-pander(smry_out)
+# prepare table for display in report
+smry_out <- xtable(smry, digits = 0, 
+                   caption = "Exhibit I: Reserve Summary", 
+                   label = "exhibit_I")
+
+names(smry_out) <- c("Paid$\\footnotemark[1]$",
+                     "Incurred$\\footnotemark[2]$", 
+                     "Ultimate$\\footnotemark[3]$", 
+                     "Case OS", "IBNR", "Total OS")
+
+print(smry_out,
+      sanitize.colnames.function = identity,
+      format.args = list(big.mark = ","),
+      caption.placement = "top",
+      hline.after = c(-1, 0, nrow(smry_out) - 1, nrow(smry_out)))
 ```
+
+\footnotetext[1]{See \hyperref[exhibit_III_sheet_1]{Exhibit III, Sheet 1}}
+\footnotetext[2]{See \hyperref[exhibit_IV_sheet_1]{Exhibit IV, Sheet 1}}
+\footnotetext[3]{See \hyperref[exhibit_II]{Exhibit II}}
 
 From the table above, estimated ultimate loss & ALAE as of `r eval_date` is `r format(smry_totals[3], big.mark = ",")` indicating a total outstanding loss & ALAE of `r format(smry_totals[6], big.mark = ",")`.
 
@@ -130,46 +146,109 @@ We used two actuarial projection techniques (paid projection and incurred projec
 
 ## Exhibits
 
-```{r ultimate_selection, echo = FALSE}
+```{r ultimate_selection, echo = FALSE, results = "asis"}
 ult_selection_totals <- lapply(ultimate_selection, sum)
 ult_selection <- rbind(ultimate_selection, ult_selection_totals)
 rownames(ult_selection) <- c(latest$year, "Totals")
 
 # rename columns and print ultimate selection table to pdf
-ult_selection_out <- ult_selection
-names(ult_selection_out) <- c("Paid Projection", "Incurred Projection", "Selected Ultimate")
-pander(ult_selection_out, caption = "Selection of Estimated Ultimate Loss & ALAE")
+ult_selection_out <- xtable(ult_selection, 
+                            caption = "Exhibit II: Selection of Estimated Ultimate Loss and ALAE",
+                            label = "exhibit_II",
+                            digits = 0)
+
+names(ult_selection_out) <- c("Paid Projection$\\footnotemark[1]$", 
+                              "Incurred Projection$\\footnotemark[2]$", 
+                              "Selected Ultimate$\\footnotemark[3]$")
+
+print(ult_selection_out,
+      sanitize.colnames.function = identity,
+      format.args = list(big.mark = ","),
+      caption.placement = "top")
 ```
+
+\footnotetext[1]{See \hyperref[exhibit_III_sheet_1]{Exhibit III, Sheet 1}}
+\footnotetext[2]{See \hyperref[exhibit_IV_sheet_1]{Exhibit IV, Sheet 1}}
+\footnotetext[2]{The average of the paid and incurred projections}
 
 \pagebreak
 
-```{r paid_projection_exhibit, echo = FALSE}
+```{r paid_projection_exhibit, echo = FALSE, results = "asis"}
 # print paid projections exhibit to pdf
-paid_proj_out <- paid_proj
-names(paid_proj_out) <- c("Paid", "LDF", "Ultimate")
-pander(paid_proj_out,
-       caption = "Paid Projection")
+paid_proj_out <- xtable(paid_proj,
+                        caption = "Exhibit III, Sheet 1: Paid Projection",
+                        label = "exhibit_III_sheet_1",
+                        digits = c(0, 0, 3, 0))
+
+names(paid_proj_out) <- c("Paid$\\footnotemark[1]$", "LDF$\\footnotemark[2]$", "Ultimate")
+
+print(paid_proj_out,
+      sanitize.colnames.function = identity,
+      format.args = list(big.mark = ","),
+      caption.placement = "top")
+```
+
+\footnotetext[1]{See \hyperref[exhibit_III_sheet_2]{Exhibit III, Sheet 2}}
+\footnotetext[2]{See \hyperref[exhibit_III_sheet_3]{Exhibit III, Sheet 3}}
+
+\pagebreak
+
+```{r paid_triangle_tables, echo = FALSE, results = "asis"}
+paid_tri_out <- xtable(exhibit(paid_tri), 
+                       caption = "Exhibit III, Sheet 2: Paid Triangle",
+                       label = "exhibit_III_sheet_2",
+                       digits = 0)
+
+print(paid_tri_out,
+      format.args = list(big.mark = ","),
+      caption.placement = "top")
+
+paid_ata_out <- xtable(paid_ata, 
+                       caption = "Exhibit III, Sheet 3:Paid Development Factor Triangle",
+                       label = "exhibit_III_sheet_3",
+                       digits = 4)
+
+print(paid_ata_out,
+      caption.placement = "top")
 ```
 
 \pagebreak
 
-```{r paid_triangle_tables, echo = FALSE}
-pander(exhibit(paid_tri), caption = "Paid Triangle")
-pander(paid_ata, caption = "Paid Development Factor Triangle")
-```
-
-\pagebreak
-
-```{r incurred_projection_exhibit, echo = FALSE}
+```{r incurred_projection_exhibit, echo = FALSE, results = "asis"}
 # Incurred projection exhibit
-incurred_proj_out <- incurred_proj
-names(incurred_proj_out) <- c("Incurred", "LDF", "Ultimate")
-pander(incurred_proj_out)
+incurred_proj_out <- xtable(incurred_proj,
+                            caption = "Incurred Projection",
+                            label = "exhibit_IV_sheet_1",
+                            digits = c(0, 0, 3, 0))
+
+names(incurred_proj_out) <- c("Incurred$\\footnotemark[1]$", "LDF$\\footnotemark[2]$", "Ultimate")
+
+print(incurred_proj_out,
+      sanitize.colnames.function = identity,
+      format.args = list(big.mark = ","),
+      caption.placement = "top")
 ```
+
+\footnotetext[1]{See \hyperref[exhibit_IV_sheet_2]{Exhibit IV, Sheet 2}}
+\footnotetext[2]{See \hyperref[exhibit_IV_sheet_3]{Exhibit IV, Sheet 3}}
 
 \pagebreak
 
-```{r incurred_triangle_tables, echo = FALSE}
-pander(exhibit(incurred_tri), caption = "Incurred Triangle")
-pander(incurred_ata, caption = "Incurred Development Factor Triangle")
+```{r incurred_triangle_tables, echo = FALSE, results = "asis"}
+incurred_tri_out <- xtable(exhibit(incurred_tri), 
+                           caption = "Exhibit IV, Sheet 2: Incurred Triangle",
+                           label = "exhibit_IV_sheet_2",
+                           digits = 0)
+
+print(incurred_tri_out,
+      format.args = list(big.mark = ","),
+      caption.placement = "top")
+
+incurred_ata_out <- xtable(incurred_ata, 
+                           caption = "Exhibit IV, Sheet 3: Incurred Development Factor Triangle",
+                           label = "exhibit_IV_sheet_3",
+                           digits = 4)
+
+print(incurred_ata_out,
+      caption.placement = "top")
 ```
