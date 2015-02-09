@@ -8,7 +8,7 @@ output:
             in_header: mystyles.sty
 ---
 \begin{abstract}
-This document demonstrates how a very simple actuarial reserve report could be created using R.  This document is only for display purposes.  It was created using insurance loss data freely available on the CAS website.  This report could be greatly improved by having better documentation for the relationships among tables.  I am just getting started with \LaTeX\ and will have more clearly documented reports in subsequent examples.
+This document demonstrates how a very simple actuarial reserve report could be created using R.  This document is only for display purposes.  It was created using insurance loss data freely available on the CAS website.  I am just getting started with \LaTeX\ and will have more clearly documented reports in subsequent examples.
 \end{abstract}
 
 \captionsetup{labelformat=empty}
@@ -164,7 +164,8 @@ names(ult_selection_out) <- c("Paid Projection$\\footnotemark[1]$",
 print(ult_selection_out,
       sanitize.colnames.function = identity,
       format.args = list(big.mark = ","),
-      caption.placement = "top")
+      caption.placement = "top",
+      hline.after = c(-1, 0, nrow(ult_selection_out) - 1, nrow(ult_selection_out)))
 ```
 
 \footnotetext[1]{See \hyperref[exhibit_III_sheet_1]{Exhibit III, Sheet 1}}
