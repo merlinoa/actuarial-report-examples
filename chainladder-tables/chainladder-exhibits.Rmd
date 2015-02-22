@@ -1,7 +1,7 @@
 ---
 title: "Creating Reports with ChainLadder Package Reserve Projections"
 author: "Andy Merlino"
-date: "Thusday, October 23, 2014"
+date: "Monday, February 23, 2015"
 output: pdf_document
 ---
 
@@ -11,18 +11,15 @@ The `ChainLadder` package can create some powerful loss reserving projections.  
 
 # Required Packages and Data
 
-```{r packages_and_options, message = FALSE, warning = FALSE}
+```{r load_packages, message = FALSE, warning = FALSE}
 # CRAN packages
 library(ChainLadder) # reserving projections
-library(pander) # make pretty tables
+library(xtable) # make pretty tables
+options(xtable.comment = FALSE) # xtable option
 
 # Ractuary packages. Install with devtools::install_github("merlinoa/*")
 library(exhibit) # default exhibits from ChainLadder package
 library(casdata) # load in the data
-
-# set pander table options
-panderOptions('table.split.table', 125)
-panderOptions('table.alignment.default', 'right')
 ```
 
 This document echos all of the code because it is intended as a reference document.  In an actual actuarial report only the final table would be displayed.
@@ -43,8 +40,7 @@ Each code chuck operates as follows:
 
 1. Use a `ChainLadder` function to make a reserve projection.
 2. Use `exhibit()` to extract a data frame summary of that projection.
-3. Use `eformat()` to apply a default format to the data frame returned by `exhibit()`.
-4. Use `pander()` to make the table look good.
+3. Use `xtable()` and its associated `xtable.print()` function to generate a \LaTeX\ table.
 
 ## Paid Loss & ALAE Triangle
 
@@ -54,13 +50,10 @@ paid_tri <- as.triangle(state, origin = "AccidentYear",
                         dev = "DevelopmentLag", value = "CumPaidLoss_D")
 
 # extracts a summary, format it, make it into a table
-pander(exhibit(paid_tri, eformat = TRUE))
-
-# Because you may want to have the unformatted output of exhibit
-# for later use in an actuarial report, the above command can 
-# also be executed like so.
-# exhibit_paid_tri <- exhibit(paid_tri)
-# pander(eformat(paid_tri))
+paid_tri_out <- exhibit(paid_tri)
+paid_tri_out <- xtable(paid_tri_out, digits = 0)
+print(paid_tri_out,
+      format.args = list(big.mark = ","))
 ```
 
 \pagebreak
@@ -71,9 +64,10 @@ pander(exhibit(paid_tri, eformat = TRUE))
 # create paid development triangle
 paid_ata <- ata(paid_tri)
 
-paid_ata <- exhibit(paid_ata)
 # format paid development triangle for presentation
-pander(eformat(paid_ata))
+paid_ata <- exhibit(paid_ata)
+paid_ata_out <- xtable(paid_ata)
+print(paid_ata_out)
 ```
 
 \pagebreak
@@ -83,9 +77,12 @@ pander(eformat(paid_ata))
 Running the GLM model with default options is as easy as this:
 
 ```{r glm, results = "asis"}
-glm_reserve <- exhibit(glmReserve(paid_tri))
+glm_reserve <- glmReserve(paid_tri)
 
-pander(eformat(glm_reserve))
+glm_reserve_out <- exhibit(glm_reserve)
+glm_reserve_out <- xtable(glm_reserve_out,
+                     digits = c(0, 0, 2, 0, 0, 0, 2))
+print(glm_reserve_out)
 ```
 
 \pagebreak
@@ -94,9 +91,11 @@ If we select to use the bootstrap method to estimate the mean squared error, the
 
 ```{r glm_boot, results = 'asis'}
 glm_boot <- glmReserve(paid_tri, mse.method = "boot")
-glm_boot_exhibit <- exhibit(glm_boot)
+glm_boot_out <- exhibit(glm_boot)
 
-pander(eformat(glm_boot_exhibit))
+glm_boot_out <- xtable(glm_boot_out,
+                  digits = c(0, 0, 2, 0, 0, 0, 2))
+print(glm_boot_out)
 ```
 
 \pagebreak
@@ -105,7 +104,10 @@ pander(eformat(glm_boot_exhibit))
 pr <- as.data.frame(glm_boot$sims.reserve.pred)
 qv <- c(0.5, 0.75, 0.9, 0.95, 0.975, 0.99)
 res_q <- t(apply(pr, 2, quantile, qv))
-pander(eformat(as.data.frame(res_q)))
+
+res_q_out <- xtable(as.data.frame(res_q),
+                    digits = 0)
+print(res_q_out)
 ```
 
 \pagebreak
@@ -114,9 +116,11 @@ Mack Chain Ladder
 
 ```{r mack, results = 'asis'}
 mack <- MackChainLadder(paid_tri)
-mack <- exhibit(mack)
+mack_out <- exhibit(mack)
 
-pander(eformat(mack))
+mack_out <- xtable(mack_out,
+              digits = c(0, 0, 2, 0, 0, 0))
+print(mack_out)
 ```
 
 Bootstrap Chain Ladder
@@ -124,7 +128,9 @@ Bootstrap Chain Ladder
 ```{r boot, results = 'asis'}
 boot <- BootChainLadder(paid_tri)
 
-boot <- exhibit(boot)
+boot_out <- exhibit(boot)
 
-pander(eformat(boot))
+boot_out <- xtable(boot_out,
+              digits = 0)
+print(boot_out)
 ```
