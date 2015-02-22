@@ -1,7 +1,7 @@
 ---
 title: "Simple Reserve Report Example"
 author: "Andy Merlino"
-date: "12/18/2014"
+date: "2/21/2015"
 output: 
   pdf_document:
         includes:
@@ -136,7 +136,7 @@ print(smry_out,
 \footnotetext[2]{See \hyperref[exhibit_IV_sheet_1]{Exhibit IV, Sheet 1}}
 \footnotetext[3]{See \hyperref[exhibit_II]{Exhibit II}}
 
-From the table above, estimated ultimate loss & ALAE as of `r eval_date` is `r format(smry_totals[3], big.mark = ",")` indicating a total outstanding loss & ALAE of `r format(smry_totals[6], big.mark = ",")`.
+From the table above, estimated ultimate loss & ALAE as of `r eval_date` is `r format(smry_totals[3], big.mark = ",", digits = 0)` indicating a total outstanding loss & ALAE of `r format(smry_totals[6], big.mark = ",", digits = 0)`.
 
 ## Methodology
 
@@ -170,7 +170,7 @@ print(ult_selection_out,
 
 \footnotetext[1]{See \hyperref[exhibit_III_sheet_1]{Exhibit III, Sheet 1}}
 \footnotetext[2]{See \hyperref[exhibit_IV_sheet_1]{Exhibit IV, Sheet 1}}
-\footnotetext[2]{The average of the paid and incurred projections}
+\footnotetext[3]{The average of the paid and incurred projections}
 
 \pagebreak
 
