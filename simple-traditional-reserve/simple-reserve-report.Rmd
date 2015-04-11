@@ -8,16 +8,17 @@ output:
             in_header: mystyles.sty
 ---
 \begin{abstract}
-This document demonstrates how a very simple actuarial reserve report could be created using R.  This document is only for display purposes.  It was created using insurance loss data freely available on the CAS website.  I am just getting started with \LaTeX\ and will have more clearly documented reports in subsequent examples.
+This document demonstrates how a very simple actuarial reserve report could be created using R.  It is only for display purposes.
 \end{abstract}
 
 \captionsetup{labelformat=empty}
 ```{r generic_info, echo = FALSE}
 eval_date <- "December 31, 1997"
+options(scipen=999)
 ```
 ## Purpose
 
-Ractuary was requested by Nsure Ance Company (NAC) to provide a reserve estimate for their workers' compensation loss and alocated loss adjustment expense (ALAE) reserves.  Losses are evaluated as of `r eval_date`... 
+Ractuary was requested by Nsure Ance Company (NAC) to provide a reserve estimate for their workers' compensation loss and allocated loss adjustment expense (ALAE) reserves.  Losses are evaluated as of `r eval_date`... 
 
 ## Background
 
@@ -117,7 +118,7 @@ rownames(smry) <- c(latest$year, "Totals")
 
 # prepare table for display in report
 smry_out <- xtable(smry, digits = 0, 
-                   caption = "Exhibit I: Reserve Summary", 
+                   caption = "Exhibit I: Loss and ALAE Reserve Summary", 
                    label = "exhibit_I")
 
 names(smry_out) <- c("Paid$\\footnotemark[1]$",
