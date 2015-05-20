@@ -1,0 +1,41 @@
+---
+title: ""
+author: "Andy Merlino"
+date: "May 20, 2015"
+output:
+    pdf_document:
+        includes:
+            in_header: mystyles.sty
+---
+
+
+
+
+
+```{r load_packages, echo = FALSE}
+library(xtable)
+library(ggplot2)
+library(emod)
+```
+
+```{r load_loss_data, echo = FALSE}
+loss <- read.csv(file = "loss_data.csv", stringsAsFactors = FALSE)
+payroll <- data.frame(class = c("8868", "9101"),
+                      payroll = c(50000000, 10000000)
+                      )
+member <- "Any County"
+```
+
+`r member` E-mod Calculation
+
+```{r run_emod, echo=FALSE}
+losses <- loss_ncci(year = loss$year,
+                    type = loss$type,
+                    incurred = loss$net_incurred
+                    )
+
+my_emod <- emod(losses, payroll)
+my_emod
+```
+
+
