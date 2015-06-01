@@ -1,14 +1,12 @@
 ---
-title: ""
-author: "Andy Merlino"
-date: "May 20, 2015"
-output:
-    emod::emod_report
+title: "Emod Report"
+author: "Racuary"
+date: "June 1, 2015"
+output: 
+  pdf_document:
+        includes:
+            in_header: mystyles.sty
 ---
-
-
-
-
 
 ```{r load_packages, echo = FALSE, warning = FALSE}
 library(xtable)
@@ -16,30 +14,38 @@ library(ggplot2)
 library(emod)
 ```
 
+
 ```{r member_values, echo = FALSE}
 # These are the only values that need to be set for each individual member
-
-```
-
-
-```{r load_loss_data, echo = FALSE}
-loss <- read.csv(file = "loss_data.csv", stringsAsFactors = FALSE)
+member_name <- "My Member"
 payroll <- data.frame(class = c("8868", "9101"),
                       payroll = c(50000000, 10000000)
                       )
-member <- "Any County"
+year <- "15/16"
+evaluation <- as.Date("2014-12-31")
 ```
 
-`r member` E-mod Calculation
 
+
+
+```{r load_loss_data, echo = FALSE}
+#load incurred loss & ALAE data
+loss <- read.csv(file = "loss_data.csv", stringsAsFactors = FALSE)
+```
+
+\begin{center}
+
+## `r member_name` E-mod Calculation for Prospective `r year` Rating Period 
+
+\end{center}
 ```{r run_emod, echo=FALSE}
-losses <- loss_ncci(year = loss$year,
-                    type = loss$type,
-                    incurred = loss$net_incurred
-                    )
+losses <- emod::loss_ncci(
+            year = loss$year,
+            type = loss$type,
+            incurred = loss$net_incurred
+          )
 
-my_emod <- emod(losses, payroll)
-my_emod
+member_emod <- emod(losses, payroll)
 ```
 
 
