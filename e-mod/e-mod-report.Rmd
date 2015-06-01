@@ -12,11 +12,17 @@ output:
 
 
 
-```{r load_packages, echo = FALSE}
+```{r load_packages, echo = FALSE, warning = FALSE}
 library(xtable)
 library(ggplot2)
 library(emod)
 ```
+
+```{r member_values, echo = FALSE}
+# These are the only values that need to be set for each individual member
+
+```
+
 
 ```{r load_loss_data, echo = FALSE}
 loss <- read.csv(file = "loss_data.csv", stringsAsFactors = FALSE)
