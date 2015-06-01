@@ -3,9 +3,7 @@ title: ""
 author: "Andy Merlino"
 date: "May 20, 2015"
 output:
-    pdf_document:
-        includes:
-            in_header: mystyles.sty
+    emod::emod_report
 ---
 
 
