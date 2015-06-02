@@ -1,0 +1,119 @@
+\documentclass[12pt,titlepage]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage{longtable, booktabs, caption, hyperref}
+
+\definecolor{Blue}{rgb}{0,0,0.8}
+\hypersetup{%
+colorlinks,%
+plainpages=true,%
+linkcolor=black,%
+citecolor=black,%
+urlcolor=Blue,%
+%pdfstartview=FitH,% or Fit
+pdfstartview={XYZ null null 1},%
+pdfview={XYZ null null null},%
+pdfpagemode=UseNone,% for no outline
+pdfauthor={Friedrich Leisch and R-core},%
+pdftitle={Sweave User Manual},%
+pdfsubject={R vignette documentation system}%
+}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+
+
+
+
+\title{Example Member \\
+       North Carolina \\
+       Workers' Compensation Emod Report}
+\author{Prepared by Ractuary}
+\date{\today}
+
+\maketitle
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning in left\_join\_impl(x, y, by\$x, by\$y): joining factors with different levels, coercing to character vector}}\end{kframe}
+\end{knitrout}
+
+\section{Background}
+
+The workers compensation emod calculation is based off a the review of loss experience over the 3 most recent fully earned policy years ending 6 months prior to the incurred loss \& ALAE evaluation date.
+
+The calculation depends on weighting and exposure factors as determined by the \href{http://www.ncrb.org/ncrb/AboutNCRB/tabid/55/Default.aspx}{North Carolina Rating Bureau} (NCRB) statistical review of the workers' compensation insurance market.
+
+\subsection{Emod Formula}
+
+$\frac{A_p+w*A_e+(1-E_e)+b}{E_p+E_e+b}$ \\
+
+Where:
+\begin{itemize}
+\item All claims consisting of only medical and expense incurred loss \& ALAE are reduced by 70\%
+\item $A$ are the actual incurred loss \& ALAE
+\item $E$ are the exxpected incurred loss \& ALAE
+\item The $_p$ subscript indicates primary\footnote{primary loss \& ALAE are all losses below a certain dollar value determined by NCRB} incurred loss \& ALAE
+\item The $_e$ subscript indicate excess\footnote{excess loss \& ALAE are all losses above the dollar value used to determine primary loss \& ALAE}
+\item w is a weighting factor dependent on $E$
+\item b is weighting value  dependent on $E$
+\end{itemize}
+
+\pagebreak
+
+\section{Example Member Emod}
+
+
+% all content after this command has new numbering system
+\appendix
+
+\end{document}

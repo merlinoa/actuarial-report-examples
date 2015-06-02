@@ -1,0 +1,87 @@
+\documentclass[12pt,titlepage]{article}
+\usepackage{longtable, booktabs, caption, hyperref}
+
+\definecolor{Blue}{rgb}{0,0,0.8}
+\hypersetup{%
+colorlinks,%
+plainpages=true,%
+linkcolor=black,%
+citecolor=black,%
+urlcolor=Blue,%
+%pdfstartview=FitH,% or Fit
+pdfstartview={XYZ null null 1},%
+pdfview={XYZ null null null},%
+pdfpagemode=UseNone,% for no outline
+pdfauthor={Friedrich Leisch and R-core},%
+pdftitle={Sweave User Manual},%
+pdfsubject={R vignette documentation system}%
+}
+
+\begin{document}
+
+<<r packages, echo = FALSE>>=
+library(xtable)
+library(ggplot2)
+library(emod)
+@
+
+<<r member_specific_info, echo = FALSE, warning = FALSE, message = FALSE>>=
+# hardcoded member information
+member_name <- "Example Member"
+evaluation <- "2014-12-31"
+payroll <- data.frame(class = c("8868", "9101"),
+                      payroll = c(50000000, 10000000)
+                      )
+
+#load incurred loss & ALAE data
+loss <- read.csv(file = "loss_data.csv", stringsAsFactors = FALSE)
+@
+
+\title{\Sexpr{member_name} \\
+       North Carolina \\
+       Workers' Compensation Emod Report}
+\author{Prepared by Ractuary}
+\date{\today}
+
+\maketitle
+
+<<r run_emod, echo=FALSE>>=
+losses <- emod::loss_ncci(
+            year = loss$year,
+            type = loss$type,
+            incurred = loss$net_incurred
+          )
+
+member_emod <- emod(losses, payroll)
+@
+
+\section{Background}
+
+The workers compensation emod calculation is based off a the review of loss experience over the 3 most recent fully earned policy years ending 6 months prior to the incurred loss \& ALAE evaluation date.
+
+The calculation depends on weighting and exposure factors as determined by the \href{http://www.ncrb.org/ncrb/AboutNCRB/tabid/55/Default.aspx}{North Carolina Rating Bureau} (NCRB) statistical review of the workers' compensation insurance market.
+
+\subsection{Emod Formula}
+
+$\frac{A_p+w*A_e+(1-E_e)+b}{E_p+E_e+b}$ \\
+
+Where:
+\begin{itemize}
+\item All claims consisting of only medical and expense incurred loss \& ALAE are reduced by 70\%
+\item $A$ are the actual incurred loss \& ALAE
+\item $E$ are the exxpected incurred loss \& ALAE
+\item The $_p$ subscript indicates primary\footnote{primary loss \& ALAE are all losses below a certain dollar value determined by NCRB} incurred loss \& ALAE
+\item The $_e$ subscript indicate excess\footnote{excess loss \& ALAE are all losses above the dollar value used to determine primary loss \& ALAE}
+\item w is a weighting factor dependent on $E$
+\item b is weighting value  dependent on $E$
+\end{itemize}
+
+\pagebreak
+
+\section{\Sexpr{member_name} Emod}
+
+
+% all content after this command has new numbering system
+\appendix
+
+\end{document}
